@@ -13,7 +13,7 @@ kernel:
 .PHONY: bootloader
 bootloader: kernel
 	@cp kernel/kernel.bin bootloader/boot/kernel.bin
-	grub-mkrescue -o bootloader.iso bootloader
+	grub-mkrescue -o os.iso bootloader
 
 .PHONY: run
 run: bootloader
