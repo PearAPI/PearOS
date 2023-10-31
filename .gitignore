@@ -1,3 +1,0 @@
-*.iso
-kernel/obj
-bootloader/boot/kernel.bin
