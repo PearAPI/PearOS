@@ -1,8 +1,142 @@
 global _start
 
+extern long_mode_start
+
 section .text
 [bits 32]
 _start:
-    ; print ok
-    mov dword [0xb8000], 0x2f4b2f4f
+    mov esp, stack_top
+
+    call check_multiboot
+    call check_cpuid
+    call check_long_mode
+
+    call setup_paging
+    call enable_paging
+
+    lgdt [gdt64.pointer]
+    jmp gdt64.code_segment:long_mode_start
+
     hlt
+
+check_multiboot:
+    cmp eax, 0x36d76289
+    jne .not_multiboot
+
+    ret
+
+.not_multiboot:
+    mov al, 'M'
+    jmp error
+
+check_cpuid:
+	pushfd
+	pop eax
+	mov ecx, eax
+	xor eax, 1 << 21
+	push eax
+	popfd
+	pushfd
+	pop eax
+	push ecx
+	popfd
+	cmp eax, ecx
+	je .no_cpuid
+	ret
+
+.no_cpuid:
+    mov al, 'C'
+    jmp error
+
+check_long_mode:
+    mov eax, 0x80000001
+    cpuid
+    cmp eax, 0x80000001
+    jne .no_long_mode
+
+    mov eax, 0x80000001
+    cpuid
+    test edx, 1 << 29
+    jz .no_long_mode
+
+    ret
+
+.no_long_mode:
+    mov al, 'L'
+    jmp error
+
+error:
+    mov dword [0xb8000], 0x4f524f45
+    mov dword [0xb8004], 0x4f524f52
+    mov dword [0xb8008], 0x4f524f52
+    mov byte [0xb800c], al
+    hlt
+
+setup_paging:
+    mov eax, L3_page_table
+    or eax, 0b11 ; Present, Writable
+    mov dword [L4_page_table], eax
+
+    mov eax, L2_page_table
+    or eax, 0b11 ; Present, Writable
+    mov dword [L3_page_table + 4*0], eax
+
+    mov ecx, 0  
+.loop:
+
+    mov eax, 0x200000 ; 2 MiB
+    mul ecx
+    or eax, 0b10000011 ; Present, Writable, Huge
+    mov [L2_page_table + ecx * 8], eax
+
+    inc ecx
+    cmp ecx, 512
+    jne .loop
+
+    ret
+
+enable_paging:
+    ; pass page table address to cr3
+    mov eax, L4_page_table
+    mov cr3, eax
+
+    ; enable PAE
+    mov eax, cr4
+    or eax, 1 << 5
+    mov cr4, eax
+
+    ; enable long mode
+    mov ecx, 0xc0000080
+    rdmsr
+    or eax, 1 << 8
+    wrmsr
+
+    ; enable paging
+    mov eax, cr0
+    or eax, 1 << 31
+    mov cr0, eax
+
+    ret
+
+section .bss
+align 4096
+
+L4_page_table:
+    resb 4096
+L3_page_table:
+    resb 4096
+L2_page_table:
+
+stack_bottom:
+    resb 4096*4
+stack_top:
+
+section .rodata
+gdt64:
+    dq 0 ; zero entry
+.code_segment: equ $ - gdt64
+    dq (1 << 43) | (1 << 44) | (1 << 47) | (1 << 53) ; 64-bit code segment
+.pointer:
+    dw $ - gdt64 - 1
+    dd gdt64
+

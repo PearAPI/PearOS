@@ -11,8 +11,8 @@ AS = nasm
 CC = gcc
 LD = ld
 AS_FLAGS = -f elf64 -o
-CC_FLAGS = -c -ffreestanding -fno-pie -fno-stack-protector -fno-builtin -nostdlib -nostdinc -Iinclude
-LD_FLAGS = -L linker.ld -Ttext 0x1000 
+CC_FLAGS = -c -ffreestanding -fno-pie -fno-stack-protector -fno-builtin -nostdlib -nostdinc -Iinclude -g -Wall -Wextra
+LD_FLAGS = -L linker.ld -Ttext 0x1000 -z noexecstack -nostdlib -g
 
 .PHONY: all
 all: mkdir kernel.bin
@@ -22,8 +22,9 @@ mkdir:
 
 .PHONY: clean
 clean:
-	rm -rf $(OBJ_DIR)
-	rm -rf kernel.bin
+	@rm -rf $(OBJ_DIR)
+	@rm -rf kernel.bin
+	@echo "Cleaned!"
 
 kernel.bin: $(C_OBJ_FILES) $(ASM_OBJ_FILES)
 	$(LD) $(LD_FLAGS) $^ -o $@

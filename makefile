@@ -17,4 +17,4 @@ bootloader: kernel
 
 .PHONY: run
 run: bootloader
-	@qemu-system-x86_64.exe -cdrom os.iso -s -S
+	@qemu-system-x86_64.exe -cdrom os.iso -gdb tcp::1234 -S
