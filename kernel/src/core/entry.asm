@@ -31,25 +31,25 @@ check_multiboot:
 
 check_cpuid:
 	pushfd
-	pop eax
-	mov ecx, eax
-	xor eax, 1 << 21
-	push eax
-	popfd
-	pushfd
-	pop eax
-	push ecx
-	popfd
-	cmp eax, ecx
-	je .no_cpuid
-	ret
+    pop eax
+    mov ecx, eax
+    xor eax, 1 << 21
+    push eax
+    popfd
+    pushfd
+    pop eax
+    push ecx
+    popfd
+    xor eax, ecx
+    jz .no_cpuid
+    ret
 
 .no_cpuid:
     mov al, 'C'
     jmp error
 
 check_long_mode:
-    mov eax, 0x80000001
+    mov eax, 0x80000000
     cpuid
     cmp eax, 0x80000001
     jne .no_long_mode
@@ -67,9 +67,8 @@ check_long_mode:
 
 error:
     mov dword [0xb8000], 0x4f524f45
-    mov dword [0xb8004], 0x4f524f52
-    mov dword [0xb8008], 0x4f524f52
-    mov byte [0xb800c], al
+    mov dword [0xb8004], 0x4f3A4f52
+    mov byte [0xb8008], al
     hlt
 
 setup_paging:
@@ -122,13 +121,13 @@ section .bss
 align 4096
 
 L4_page_table:
-    resb 4096
+    resb 4096 ; 4 KiB
 L3_page_table:
-    resb 4096
+    resb 4096 ; 4 KiB
 L2_page_table:
 
 stack_bottom:
-    resb 4096*4
+    resb 4096*4 ; 16 KiB
 stack_top:
 
 section .rodata

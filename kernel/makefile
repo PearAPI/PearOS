@@ -12,7 +12,7 @@ CC = gcc
 LD = ld
 AS_FLAGS = -f elf64 -o
 CC_FLAGS = -c -ffreestanding -fno-pie -fno-stack-protector -fno-builtin -nostdlib -nostdinc -Iinclude -g -Wall -Wextra
-LD_FLAGS = -L linker.ld -Ttext 0x1000 -z noexecstack -nostdlib -g
+LD_FLAGS = -T linker.ld -z noexecstack -nostdlib -g
 
 .PHONY: all
 all: mkdir kernel.bin

@@ -1,4 +1,4 @@
-*.iso
+os.iso
 kernel/obj
 bootloader/boot/kernel.bin
 kernel/kernel.bin
