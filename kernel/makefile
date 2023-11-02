@@ -11,7 +11,7 @@ AS = nasm
 CC = gcc
 LD = ld
 AS_FLAGS = -f elf64 -o
-CC_FLAGS = -c -ffreestanding -fno-pie -fno-stack-protector -fno-builtin -nostdlib -nostdinc -Iinclude -g -Wall -Wextra
+CC_FLAGS = -c -ffreestanding -fno-pie -fno-stack-protector -fno-builtin -nostdlib -nostdinc -Isrc/include -g -Wall -Wextra
 LD_FLAGS = -T linker.ld -z noexecstack -nostdlib -g
 
 .PHONY: all

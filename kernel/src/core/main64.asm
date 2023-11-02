@@ -14,4 +14,10 @@ long_mode_start:
     mov fs, ax
     mov gs, ax
 
+    ; set stack pointer
+    mov rsp, 0x90000
+
+    ; call kernel_main
+    call kernel_main
+
     hlt

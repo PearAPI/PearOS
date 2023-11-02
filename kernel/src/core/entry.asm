@@ -1,4 +1,5 @@
 global _start
+global kernelPageDirectory
 
 extern long_mode_start
 
@@ -49,18 +50,17 @@ check_cpuid:
     jmp error
 
 check_long_mode:
-    mov eax, 0x80000000
-    cpuid
-    cmp eax, 0x80000001
-    jne .no_long_mode
+	mov eax, 0x80000000
+	cpuid
+	cmp eax, 0x80000001
+	jb .no_long_mode
 
-    mov eax, 0x80000001
-    cpuid
-    test edx, 1 << 29
-    jz .no_long_mode
-
-    ret
-
+	mov eax, 0x80000001
+	cpuid
+	test edx, 1 << 29
+	jz .no_long_mode
+	
+	ret
 .no_long_mode:
     mov al, 'L'
     jmp error
@@ -69,12 +69,17 @@ error:
     mov dword [0xb8000], 0x4f524f45
     mov dword [0xb8004], 0x4f3A4f52
     mov byte [0xb8008], al
+    mov dword [0xb800a], 0x00200020
     hlt
 
 setup_paging:
+    mov eax, cr0                                   ; Set the A-register to control register 0.
+    and eax, 01111111111111111111111111111111b     ; Clear the PG-bit, which is bit 31.
+    mov cr0, eax
+
     mov eax, L3_page_table
     or eax, 0b11 ; Present, Writable
-    mov dword [L4_page_table], eax
+    mov dword [kernelPageDirectory], eax
 
     mov eax, L2_page_table
     or eax, 0b11 ; Present, Writable
@@ -96,7 +101,7 @@ setup_paging:
 
 enable_paging:
     ; pass page table address to cr3
-    mov eax, L4_page_table
+    mov eax, kernelPageDirectory
     mov cr3, eax
 
     ; enable PAE
@@ -120,7 +125,7 @@ enable_paging:
 section .bss
 align 4096
 
-L4_page_table:
+kernelPageDirectory:
     resb 4096 ; 4 KiB
 L3_page_table:
     resb 4096 ; 4 KiB
@@ -132,10 +137,22 @@ stack_top:
 
 section .rodata
 gdt64:
-    dq 0 ; zero entry
+	dq 0 ; zero entry
 .code_segment: equ $ - gdt64
-    dq (1 << 43) | (1 << 44) | (1 << 47) | (1 << 53) ; 64-bit code segment
+	dw 0xffff ; limit
+	dw 0 ; base
+	db 0 ; base
+	db 10011010b ; access
+	db 10101111b ; flags(paged 32 bit) & granularity
+	db 0 ; base
+.data_segment:
+	dw 0xffff ; limit
+	dw 0 ; base
+	db 0 ; base
+	db 10010010b ; access
+	db 10101111b ; flags(paged 32 bit) & granularity
+	db 0 ; base	
 .pointer:
-    dw $ - gdt64 - 1
-    dd gdt64
+	dw $ - gdt64 - 1 ; length
+	dq gdt64 ; address
 
