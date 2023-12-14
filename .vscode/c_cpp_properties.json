@@ -1,15 +1,29 @@
 {
+    "env": {
+        "includes": [
+            "${workspaceFolder}/kernel/include/private/",
+            "${workspaceFolder}/kernel/include/public/"
+        ]
+    },
+
     "configurations": [
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/kernel/src/include"
+                "${includes}"
             ],
-            "defines": [], 
-            "cStandard": "c17",
-            "cppStandard": "gnu++17",
-            "intelliSenseMode": "linux-gcc-x64",
-            "configurationProvider": "ms-vscode.makefile-tools",
+            "defines": [],
+            "compilerPath": "/usr/bin/g++",
+            "cStandard": "c99",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-clang-x64",
+            "browse": {
+                "path": [
+                    "${includes}"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            },
         }
     ],
     "version": 4

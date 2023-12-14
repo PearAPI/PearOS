@@ -13,8 +13,8 @@ kernel:
 .PHONY: bootloader
 bootloader: kernel
 	@cp kernel/kernel.bin bootloader/boot/kernel.bin
-	grub-mkrescue -o os.iso bootloader
+	grub-mkrescue -o os.iso bootloader/
 
 .PHONY: run
 run: bootloader
-	@qemu-system-x86_64.exe -cdrom os.iso -gdb tcp::1234 -S -vga std -monitor stdio -m 512M
+	@qemu-system-x86_64 -cdrom os.iso -gdb tcp::1234 -vga std -monitor stdio -m 512M

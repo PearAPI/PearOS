@@ -1,3 +1,13 @@
 {
-    "C_Cpp.errorSquiggles": "disabled"
+    "C_Cpp.default.systemIncludePath": [
+        "${workspaceFolder}/kernel/include/private/",
+        "${workspaceFolder}/kernel/include/public/"
+    ],
+    "files.associations": {
+        "gdt.h": "c",
+        "hal.h": "c",
+        "stdint.h": "c",
+        "idt.h": "c",
+        "isr.C": "cpp"
+    }
 }
