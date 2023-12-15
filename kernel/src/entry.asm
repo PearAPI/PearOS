@@ -1,5 +1,4 @@
 global _start
-global kernelPageDirectory
 
 extern kernel_main
 
@@ -12,7 +11,6 @@ _start:
     call check_cpuid
     
     call kernel_main
-
     hlt
 
 check_multiboot:

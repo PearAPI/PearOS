@@ -1,5 +1,7 @@
 C_SRC_FILES = $(shell find $(SRC_DIR) -type f -name '*.c')
 C_OBJ_FILES = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.c.o, $(C_SRC_FILES))
+# libgcc is a library that contains some functions that are needed by the compiler
+C_OBJ_FILES += lib/libgcc/libgcc-i386.a
 
 CPP_SRC_FILES = $(shell find $(SRC_DIR) -type f -name '*.cpp')
 CPP_OBJ_FILES = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.cpp.o, $(CPP_SRC_FILES))
@@ -17,7 +19,7 @@ LD = ld
 AS_FLAGS = -f elf32 -o
 CC_FLAGS = -c -m32 -ffreestanding -fno-pie -fno-stack-protector -fno-builtin -nostdlib -nostdinc -Isrc/include -g -Wall -Wextra -Iinclude/private -Iinclude/public
 CPP_FLAGS = -c -m32 -ffreestanding -fno-pie -fno-stack-protector -fno-builtin -nostdlib -nostdinc -Isrc/include -g -Wall -Wextra -Iinclude/private -Iinclude/public
-LD_FLAGS = -T linker.ld -z noexecstack -nostdlib -g -m elf_i386 -L/usr/lib/gcc/x86_64-pc-linux-gnu/13.2.1/32/libgcc.a
+LD_FLAGS = --verbose -T linker.ld -z noexecstack -nostdlib -g -melf_i386
 
 .PHONY: all
 all: mkdir kernel.bin
@@ -30,6 +32,7 @@ clean:
 	@rm -rf $(OBJ_DIR)
 	@rm -rf kernel.bin
 	@echo "Cleaned!"
+	@clear
 
 kernel.bin: $(C_OBJ_FILES) $(ASM_OBJ_FILES) $(CPP_OBJ_FILES)
 	$(LD) $(LD_FLAGS) $^ -o $@
