@@ -47,7 +47,7 @@ void i686_ISR_Initialize() {
     for(int i = 0; i < 256; i++)
         i686_IDT_EnableGate(i);
 
-    i686_IDT_DisableGate(0x50);
+    // i686_IDT_DisableGate(0x50);
 }
 
 void __attribute__((cdecl)) i686_ISR_handler(Registers* regs)
@@ -70,4 +70,10 @@ void __attribute__((cdecl)) i686_ISR_handler(Registers* regs)
         printf("KERNEL PANIC\n");
         i686_panic();
     }
+}
+
+void i686_ISR_RegisterHandler(int interrupt, ISRHandler handler)
+{
+    g_ISRHandlers[interrupt] = handler;
+    i686_IDT_EnableGate(interrupt);
 }
