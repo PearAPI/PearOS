@@ -1,0 +1,29 @@
+CompileFlags:
+  # Add flags that help clangd understand the code but shouldn't be in the actual build.
+  Add: 
+    - "-D__CLANGD__"   # Useful if you need to #ifdef out code that confuses the LSP
+    - "--target=x86_64-unknown-none-elf" # Optional: If you are cross-compiling, ensure clangd knows the target
+
+Diagnostics:
+  # Enable Clang-Tidy checks to catch low-level bugs
+  ClangTidy:
+    Add: 
+      - bugprone-*
+      - performance-*
+      - portablity-*
+      - readability-redundant-*
+    Remove:
+      - bugprone-easily-swappable-parameters # Often too noisy in C
+      #- clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling # OS devs often use "unsafe" functions intentionally
+
+  # specific diagnostics configuration
+  UnusedIncludes: Strict
+
+InlayHints:
+  Enabled: Yes
+  ParameterNames: Yes    # Helps identify args in functions like compile_memory(0x0, 0x1000, 3)
+  DeducedTypes: Yes      # Shows the type of auto or complex macros
+  Designators: Yes       # Essential for struct initialization: .field = value
+
+Hover:
+  ShowAKA: Yes           # Shows the underlying type of typedefs (e.g., uint64_t -> unsigned long)
