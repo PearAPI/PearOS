@@ -1,5 +1,6 @@
 #include "interrupts/idt.h"
 #include "io/screen.h"
+#include "io/serial/Debug/DebugServer.h"
 #include "io/serial/Serial.h"
 #include "io/serial/SerialLog.h"
 #include "memory/PMM.h"
@@ -14,33 +15,30 @@ extern void _init_global_constructors();
 extern "C" uint64_t _bss_end_addr[];
 
 PMM pmm;
-Serial serial;
-Serial debugSerial(Serial::COM::COM2, Serial::BaudRate::BAUD_115200);
+Serial debugSerial(Serial::COM::COM1);
+Serial logSerial(Serial::COM::COM2);
+
+DebugServer debugServer;
 
 extern "C" void kernel_main(uint64_t multiboot_magic, uint64_t multiboot_addr) {
     _init_global_constructors(); // this is needed for global constructors
-
-    serial.init();
-    debugSerial.init();
-    init_Log(&serial);
-
-    if (multiboot_magic != 0x2BADB002) {
-        LOG_ERROR("Invalid multiboor magic: 0x%x", multiboot_magic);
-    }
-
-    LOG_INFO("Multiboot Struct Pointer at: 0x%x", multiboot_addr);
 
     clear_screen();
 
     pic_remap();
     idt_init();
 
-    serial.setCallback([](char c) {
-        serial.print(&c, 1);
-    });
+    debugSerial.init();
+    logSerial.init();
 
-    const char* test = "Hello World";
-    LOG_INFO("%p", test);
+    // init_Log(&serial);
+    debugServer.Init(debugSerial);
+
+    debugSerial.printf("Hello World %d %x %p %c %s\n", 123, 0x123, &debugSerial, 'a', "Hello World");
+
+    if (multiboot_magic != 0x2BADB002) {
+        LOG_ERROR("Invalid multiboor magic: 0x%x", multiboot_magic);
+    }
 
     multiboot_info* info = (multiboot_info*)multiboot_addr;
 

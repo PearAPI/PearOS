@@ -67,10 +67,10 @@ clean:
 	rm -rf $(BUILD_DIR)
 
 run: $(BUILD_DIR)/os.iso
-	qemu-system-x86_64 -cdrom $(BUILD_DIR)/os.iso -serial stdio -serial tcp:127.0.0.1:4444,server,nowait
+	qemu-system-x86_64 -cdrom $(BUILD_DIR)/os.iso -serial tcp::4444,server,nowait -serial stdio
 
 debug: $(BUILD_DIR)/os.iso
 	@echo "Waiting for debugger..."
-	qemu-system-x86_64 -s -S -cdrom $(BUILD_DIR)/os.iso -serial stdio -serial tcp:127.0.0.1:4444,server,nowait
+	qemu-system-x86_64 -s -S -cdrom $(BUILD_DIR)/os.iso -serial tcp::4444,server,nowait -serial stdio
 
 .PHONY: all clean run iso kernel debug

@@ -1,6 +1,6 @@
 #include "interrupts/idt.h"
 #include "interrupts/interrupt.h"
-#include "io/serial/SerialLog.h"
+#include "pic.h"
 
 #define asm(x) __asm__ volatile(x)
 
@@ -52,6 +52,11 @@ extern "C" void interrupt_handler(CPUContext* context) {
 
     if (interrupt_handlers[interrupt_number] != nullptr) {
         interrupt_handlers[interrupt_number](context);
+    }
+
+    if (context->interrupt_number >= 32 && context->interrupt_number <= 47) {
+        uint8_t irq_no = context->interrupt_number - 32;
+        pic_send_eoi(irq_no);
     }
 }
 

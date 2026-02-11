@@ -21,21 +21,21 @@ const char* levelToString(LogLevel level) {
 }
 
 void logf(LogLevel level, const char* file, int line, const char* format, ...) {
-    serial->print("[", 1);
+    serial->write("[");
     const char* levelStr = levelToString(level);
     size_t len = 0;
     while (levelStr[len] != '\0')
         len++;
-    serial->print(levelStr, len);
-    serial->print("] ", 2);
-    serial->print(" (", 2);
+    serial->write(levelStr);
+    serial->write("] ");
+    serial->write(" (");
     serial->printf("%s : %d", file, line);
-    serial->print(") ", 2);
+    serial->write(") ");
 
     va_list args;
     va_start(args, format);
     serial->vprintf(format, args);
     va_end(args);
 
-    serial->print("\n", 1);
+    serial->write("\n");
 }
